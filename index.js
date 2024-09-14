@@ -5,31 +5,32 @@ const bodyParser = require("body-parser")
 const app = express()
 
 app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST"],
-  })
+    cors({
+        origin: "*",
+        methods: ["GET", "POST"],
+        allowedHeaders: ["Content-Type"]
+    })
 )
-app.use(bodyParser.json())
-
 // Handle preflight requests
 app.options("*", cors())
+
+app.use(bodyParser.json())
 
 const { broAppLogoBase64Encoded } = require("./logo.js")
 
 app.get("/", (req, res) => {
-  res.send("Hello World!")
+    res.send("Hello World!")
 })
 
 app.post("/generate-invoice", async (req, res) => {
-  const { invoiceData } = req.body
+    const { invoiceData } = req.body
 
-  const broAppLogo = broAppLogoBase64Encoded
+    const broAppLogo = broAppLogoBase64Encoded
 
-  const browser = await puppeteer.launch()
-  const page = await browser.newPage()
+    const browser = await puppeteer.launch()
+    const page = await browser.newPage()
 
-  const html = `
+    const html = `
         <!DOCTYPE html>
         <html lang="en">
         
@@ -220,17 +221,15 @@ app.post("/generate-invoice", async (req, res) => {
                     <div></div>
                    <div class="totals">
                         <p><span>Sub-Total:</span> <span>₹${invoiceData?.paymentDetails?.subTotal}</span></p>
-                        ${
-                          invoiceData?.paymentDetails?.discountAmount
-                            ? `<p><span>Discount Amount:</span> <span>₹${invoiceData?.paymentDetails?.discountAmount}</span></p>`
-                            : ""
-                        }
+                        ${invoiceData?.paymentDetails?.discountAmount
+            ? `<p><span>Discount Amount:</span> <span>₹${invoiceData?.paymentDetails?.discountAmount}</span></p>`
+            : ""
+        }
                         <p><span>Tax Amount:</span> <span>₹${invoiceData?.paymentDetails?.taxAmount}</span></p>
-                        ${
-                          invoiceData?.paymentDetails?.fee
-                            ? `<p><span>Fee:</span> <span>₹${invoiceData?.paymentDetails?.fee}</span></p>`
-                            : ""
-                        }
+                        ${invoiceData?.paymentDetails?.fee
+            ? `<p><span>Fee:</span> <span>₹${invoiceData?.paymentDetails?.fee}</span></p>`
+            : ""
+        }
                     </div>
                 </div>
                 <div class="footer">
@@ -246,30 +245,30 @@ app.post("/generate-invoice", async (req, res) => {
         </html>
         `
 
-  await page.setContent(html, { waitUntil: "domcontentloaded" })
+    await page.setContent(html, { waitUntil: "domcontentloaded" })
 
-  const pdfBuffer = await page.pdf({
-    format: "A4",
-    printBackground: true,
-  })
+    const pdfBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+    })
 
-  await browser.close()
+    await browser.close()
 
-  // fs.writeFileSync('invoice-debug.pdf', pdfBuffer);
+    // fs.writeFileSync('invoice-debug.pdf', pdfBuffer);
 
-  res.set({
-    "Content-Type": "application/pdf",
-    "Content-Disposition": 'attachment; filename="invoice.pdf"',
-    "Content-Length": pdfBuffer.length,
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST",
-  })
-  res.end(pdfBuffer)
+    res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": 'attachment; filename="invoice.pdf"',
+        "Content-Length": pdfBuffer.length,
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST",
+    })
+    res.end(pdfBuffer)
 })
 
 const port = 3001
 app.listen(port, () => {
-  console.log("Server is running on port " + port)
+    console.log("Server is running on port " + port)
 })
 
 module.exports = app
