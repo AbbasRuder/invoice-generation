@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 
 const { broAppLogoBase64Encoded } = require('./logo.js');
 
-app.post('/generate-pdf', async (req, res) => {
+app.post('/generate-invoice', async (req, res) => {
     const { invoiceData } = req.body;
 
     const broAppLogo = broAppLogoBase64Encoded
