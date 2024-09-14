@@ -10,6 +10,9 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 
+// Handle preflight requests
+app.options('*', cors());
+
 const { broAppLogoBase64Encoded } = require('./logo.js');
 
 app.get('/', (req, res) => {
