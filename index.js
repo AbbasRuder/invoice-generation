@@ -4,12 +4,14 @@ const puppeteer = require('puppeteer');
 const bodyParser = require('body-parser');
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST'],
+}));
 app.use(bodyParser.json());
 
 const { broAppLogoBase64Encoded } = require('./logo.js');
 
-//test route
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
